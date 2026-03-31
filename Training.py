@@ -203,7 +203,8 @@ def ploting (f1_and_confidence):
     graph2.set_ylabel ("Accuracy")
 
     plt.tight_layout (pad = 4.0)
-    # plt.show ()
+    plt.savefig ("Graph.png")
+    plt.show ()
 
 
 missing_data ()
