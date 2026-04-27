@@ -114,29 +114,24 @@ This project evaluates multiple machine learning models:
 └── README.md
 ```
 
-
-
-## Installation
-
-```bash
-pip install pandas numpy scikit-learn matplotlib seaborn scipy joblib
-```
-
 ---
 
-## ▶️ Usage
+## How to Run
 
-### Train the Model
+1.  **Clone the Repository**:
+    ```bash
+    cd "Your Directory"
+    git clone https://github.com/Dochikhoa2006/Quora-Question-Pairs-Duplicate-Detection.git
+    ```
 
-```bash
-python Training.py
-```
-
-### Run Inference
-
-```bash
-python Inference.py
-```
+2.  **Docker**:
+    * To build docker image:
+        ```bash
+        docker build -t sleeping-disorder-multi-classification .
+    * To run docker container:
+        ```bash
+        docker run -it sleeping-disorder-multi-classification
+        ```
 
 ---
 
