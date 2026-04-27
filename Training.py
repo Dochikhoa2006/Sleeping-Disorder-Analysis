@@ -230,13 +230,3 @@ joblib.dump (model, "Gradient Boosting Classifier.pkl")
 joblib.dump (model_features, "Model Features.pkl")
 joblib.dump (one_hot_encoding_feature, "One-Hot Encoding.pkl")
 joblib.dump (ordered_target_encoding_feature, "Ordered Target Encoding.pkl")
-
-
-
-
-
-# cd "/Users/chikhoado/Desktop/PROJECTS/Sleeping Disorder"
-# python3 -m venv .venv
-# source .venv/bin/activate
-# pip install pandas scikit-learn numpy seaborn
-# python "/Users/chikhoado/Desktop/PROJECTS/Sleeping Disorder/Training.py"

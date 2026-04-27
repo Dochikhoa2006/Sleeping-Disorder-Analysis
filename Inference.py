@@ -169,13 +169,3 @@ rate_into_categorial ()
 one_hot_encoding ()
 ordered_target_encoding ()
 make_prediction (patient_data)
-
-
-
-
-
-# cd "/Users/chikhoado/Desktop/PROJECTS/Sleeping Disorder"
-# python3 -m venv .venv
-# source .venv/bin/activate
-# pip install pandas scikit-learn numpy seaborn
-# python "/Users/chikhoado/Desktop/PROJECTS/Sleeping Disorder/Inference.py"
