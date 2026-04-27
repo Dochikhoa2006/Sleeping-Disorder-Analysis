@@ -140,34 +140,23 @@ python Inference.py
 
 ---
 
-## Model Evaluation
-
-The evaluation focuses on two key dimensions: **predictive performance (F1-Score)** and **model reliability (stability across runs)**.
-
-### Performance Comparison
-
-- **Gradient Boosting** achieved the highest performance with an F1-Score of **0.88**  
-- **Logistic Regression (Softmax)** followed with **0.84**  
-- **Support Vector Machine (SVM)** achieved **0.83**, remaining competitive  
-
-The use of **macro-averaged F1-score** ensures fair evaluation across all classes, regardless of class imbalance.
-
----
-
-### Model Stability
-
-- **Logistic Regression with Softmax** achieves solid accuracy (~0.86) but exhibits the highest variability, making it more sensitive to data splits  
-- **Support Vector Machine** demonstrates moderate stability with slightly higher variance  
-- **Gradient Boosting Classifier** shows the highest mean accuracy (~0.90) with low variance, indicating strong and consistent performance  
-
----
-
 ### Visualization
 
 ![Model Evaluation](Graph.png)
 
 > The chart compares model performance (F1 Score and Confidence Interval of Accuracy Score).
 
+---
+
+### 📊 Model Evaluation Results
+
+| Model | F1-Score (Macro) | Stability (Variance) |
+| :--- | :---: | :--- |
+| **Gradient Boosting** | **0.88** | **High (Most Consistent)** |
+| Logistic Regression | 0.84 | Low (High Sensitivity) |
+| Support Vector Machine| 0.83 | Moderate |
+
+**Key Insight:** Gradient Boosting outperformed linear models by effectively capturing non-linear relationships between "Stress Level" and "Sleep Apnea" that PCA components highlighted.
 
 
 ## Tech Stack
