@@ -16,7 +16,7 @@ import re
 
 random.seed (150)
 
-dataset = pd.read_csv ('/Users/chikhoado/Desktop/PROJECTS/Sleeping Disorder/Sleep_health_and_lifestyle_dataset.csv')
+dataset = pd.read_csv ('Sleep_health_and_lifestyle_dataset.csv')
 data_dimension = dataset.shape
 category_classifier = "Sleep Disorder"
 one_hot_encoding_feature = []
