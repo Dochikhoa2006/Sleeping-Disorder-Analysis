@@ -1,0 +1,69 @@
+import unittest
+
+import pandas as pd
+
+from src.preprocessing import SleepFeatureEngineer
+
+
+def patient_frame(blood_pressure: str = "120/80") -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "Person ID": 999,
+                "Gender": "Female",
+                "Age": 35,
+                "Occupation": "Engineer",
+                "Sleep Duration": 7.5,
+                "Quality of Sleep": 8,
+                "Physical Activity Level": 45,
+                "Stress Level": 4,
+                "BMI Category": "Normal Weight",
+                "Blood Pressure": blood_pressure,
+                "Heart Rate": 68,
+                "Daily Steps": 8_000,
+            }
+        ]
+    )
+
+
+class SleepFeatureEngineerTests(unittest.TestCase):
+    def test_drops_identifier_and_parses_blood_pressure(self) -> None:
+        transformed = SleepFeatureEngineer().fit_transform(patient_frame())
+
+        self.assertNotIn("Person ID", transformed.columns)
+        self.assertEqual(transformed.loc[0, "Systolic Blood Pressure"], 120)
+        self.assertEqual(transformed.loc[0, "Diastolic Blood Pressure"], 80)
+        self.assertEqual(
+            transformed.loc[0, "Blood Pressure Category"],
+            "stage 1 hypertension",
+        )
+        self.assertEqual(transformed.loc[0, "BMI Category"], "Normal")
+
+    def test_severe_hypertension_is_not_shadowed_by_stage_two(self) -> None:
+        transformed = SleepFeatureEngineer().fit_transform(patient_frame("180/120"))
+
+        self.assertEqual(
+            transformed.loc[0, "Blood Pressure Category"],
+            "severe hypertension",
+        )
+
+    def test_malformed_blood_pressure_becomes_measurement_error(self) -> None:
+        transformed = SleepFeatureEngineer().fit_transform(patient_frame("unknown"))
+
+        self.assertEqual(
+            transformed.loc[0, "Blood Pressure Category"],
+            "measurement error",
+        )
+        self.assertTrue(
+            pd.isna(transformed.loc[0, "Systolic Blood Pressure"])
+        )
+
+    def test_rejects_missing_features(self) -> None:
+        incomplete = patient_frame().drop(columns=["Gender"])
+
+        with self.assertRaisesRegex(ValueError, "Gender"):
+            SleepFeatureEngineer().fit_transform(incomplete)
+
+
+if __name__ == "__main__":
+    unittest.main()

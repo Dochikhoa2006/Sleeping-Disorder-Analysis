@@ -1,199 +1,227 @@
-# Sleep Health and Lifestyle Dataset Analysis & Prediction
+# Sleep Disorder Classification
 
-## Overview
+A reproducible machine-learning project that classifies a record as
+**Healthy**, **Insomnia**, or **Sleep Apnea** from sleep, lifestyle, and
+physiological features.
 
-This project focuses on analyzing sleep health and predicting sleep disorders using lifestyle and physiological data. A **Gradient Boosting Classifier** is used to classify individuals into sleep disorder categories based on various health metrics.
+The deployable artifact is one scikit-learn pipeline containing feature
+engineering, missing-value handling, encoding, scaling, and classification.
+Training and prediction therefore apply exactly the same transformations.
 
+## Results
 
+Models were compared with stratified, group-aware five-fold cross-validation.
+Rows with identical predictive features stay in the same fold, preventing
+duplicate patient profiles from appearing in both training and validation.
+Selection was based on mean macro F1, which gives equal importance to all
+three classes.
 
-## Features
+| Model | Macro F1 | Mean accuracy | Fold accuracy SD |
+| --- | ---: | ---: | ---: |
+| Logistic Regression | 0.863 | 0.891 | 0.059 |
+| **Support Vector Machine** | **0.884** | **0.909** | **0.039** |
+| Gradient Boosting | 0.860 | 0.893 | 0.042 |
 
-* Data preprocessing and cleaning
-* Feature engineering (e.g., blood pressure categorization)
-* Categorical encoding (One-Hot + Target Encoding)
-* Dimensionality reduction using PCA (95% variance retained)
-* Machine learning model: Gradient Boosting Classifier, Softmax Regression, Mulit-Classification Support Vector Machine
-* Real-time inference pipeline for predictions
+Support Vector Machine achieved the highest mean macro F1 in this comparison
+and was fitted on the full dataset for the saved pipeline. These are internal
+cross-validation estimates, not results from an independent external test set.
 
+![Model comparison](reports/model_comparison.png)
 
+## What Was Corrected
 
-## Dataset Information
+- The model now saves preprocessing and classification as one pipeline.
+- Training and prediction use identical feature transformations.
+- `Person ID` is excluded because it is an identifier, not a clinical feature.
+- Blood pressure is parsed into systolic and diastolic values, and severe
+  hypertension is checked before the broader stage-2 condition.
+- Categorical features use an encoder that safely handles unseen values.
+- Numeric and categorical missing values are imputed inside each validation
+  fold, preventing preprocessing leakage.
+- Identical feature rows are assigned to the same validation group to prevent
+  duplicate-profile leakage.
+- Model selection uses stratified, group-aware five-fold cross-validation
+  instead of one train/test split.
 
-* **File:** `Sleep_health_and_lifestyle_dataset.csv`
-* **Rows:** 374
-* **Columns:** 13
+## Repository Structure
 
-### General Variables
-
-| Variable         | Description                             |
-| ---------------- | --------------------------------------- |
-| Person ID        | Unique identifier                       |
-| Gender           | Male / Female                           |
-| Age              | Age in years                            |
-| Occupation       | Category of work                        |
-| Sleep Duration   | Hours of sleep per day                  |
-| Quality of Sleep | Rating (1–10)                           |
-| Physical Activity Level | Minutes of exercise per day    |    
-| Stress Level     | Rating (1–10)                           |
-| BMI Category     | Normal, Overweight, Obese               |
-| Blood Pressure   | Format: systolic/diastolic              |
-| Heart Rate       | Beats per minute (BPM)                  |
-| Daily Steps      | Total number of steps per day           |
-
-### Target Variable
-
-| Target Variable  | Description                             |
-| ---------------- | --------------------------------------- |
-| Sleep Disorder   | Healthy, Insomnia, Sleep Apnea |
-
-> Note: "None" values in *Sleep Disorder* are treated as **Healthy**.
-
-
-
-## Methodology
-
-### Data Processing
-
-* Missing values handled via imputation
-* Blood pressure categorized into:
-
-  * Normal
-  * Elevated
-  * Stage 1 Hypertension
-  * Stage 2 Hypertension
-  * Severe Hypertension
-  > Note: Extraordinary record of blood pressure are treated as **Measurement Error**.
-
-### Encoding
-
-- **One-Hot Encoding**: Applied to *Gender* and *BMI Category* to convert categorical variables into binary indicators, avoiding ordinal assumptions. This method is suitable for low-cardinality features.
-
-- **Ordered Target Encoding (CatBoost Encoding)**: Applied to *Occupation*, encoding categories based on the mean target value (*Sleep Disorder*). The ordered approach reduces target leakage by computing encodings sequentially. Laplace smoothing is used to stabilize estimates for rare categories. This method is effective for high-cardinality features.
-
-### Dimensionality Reduction
-
-- **Principal Component Analysis (PCA)**: Reduces dimensionality while retaining 95% of the dataset’s variance. PCA transforms correlated features into a smaller set of linearly independent components, improving efficiency and reducing noise and multicollinearity.
-
-
-### Model
-
-This project evaluates multiple machine learning models:
-
-- **Logistic Regression**
-  - Approach: Multinomial Logistic Regression using the Softmax function
-  - Purpose: Outputs probability distribution across sleep disorder classes
-  - Reproducibility:
-    - Solver: lbfgs
-    - Random state: 150
-
-- **Support Vector Machine (SVM)**
-  - Strategy: One-vs-Rest (OvR) for multi-class classification
-  - Reproducibility:
-    - Kernel: polynomial
-    - Degree: 3 (θ<sup>3</sup>)
-    - Regularization parameter (C): 1
-
-- **Gradient Boosting Classifier**
-  - Implementation: Ensemble learning using sequential decision trees
-  - Reproducibility:
-    - Number of estimators: 80
-    - Maximum depth: 2
-    - Random state: 150
-
-## Project Structure
-
-```
-├── Sleep_health_and_lifestyle_dataset.csv
-├── Training.py
-├── Inference.py
-├── Gradient Boosting Classifier.pkl
-├── Model Features.pkl
-├── One-Hot Encoding.pkl
-├── Ordered Target Encoding.pkl
-├── Graph.png
-└── README.md
+```text
+sleep-disorder-classification/
+├── data/
+│   └── README.md
+├── models/
+│   └── sleep_disorder_pipeline.joblib
+├── reports/
+│   └── model_comparison.png
+├── src/
+│   ├── train.py
+│   ├── predict.py
+│   └── preprocessing.py
+├── tests/
+│   ├── test_prediction.py
+│   ├── test_preprocessing.py
+│   └── test_training.py
+├── .github/workflows/ci.yml
+├── .dockerignore
+├── .gitignore
+├── Dockerfile
+├── LICENSE
+├── README.md
+└── requirements.txt
 ```
 
----
+## Dataset
 
-## How to Run
+The project uses the
+[Sleep Health and Lifestyle Dataset](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset).
+The local training file contains 374 records and 13 columns. Missing target
+values are interpreted as `Healthy`.
 
-1.  **Clone the Repository**:
-    ```bash
-    cd "Your Directory"
-    git clone https://github.com/Dochikhoa2006/Quora-Question-Pairs-Duplicate-Detection.git
-    ```
+The dataset is published separately under **CC0: Public Domain**. It is not
+covered by this repository's MIT License. Download instructions are available
+in [`data/README.md`](data/README.md); CSV files are intentionally excluded
+from Git.
 
-2.  **Docker**:
-    * To build docker image:
-        ```bash
-        docker build -t sleeping-disorder-multi-classification .
-    * To run docker container:
-        ```bash
-        docker run -it sleeping-disorder-multi-classification
-        ```
+## Installation
 
----
+Python 3.11 or newer is recommended.
 
-### Visualization
+```bash
+git clone https://github.com/Dochikhoa2006/Sleeping-Disorder-Analysis.git
+cd Sleeping-Disorder-Analysis
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
-![Model Evaluation](Graph.png)
+On Windows PowerShell, activate the environment with:
 
-> The chart compares model performance (F1 Score and Confidence Interval of Accuracy Score).
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
----
+## Train
 
-### 📊 Model Evaluation Results
+Place the dataset at
+`data/Sleep_health_and_lifestyle_dataset.csv`, then run:
 
-| Model | F1-Score (Macro) | Stability (Variance) |
-| :--- | :---: | :--- |
-| **Gradient Boosting** | **0.88** | **High (Most Consistent)** |
-| Logistic Regression | 0.84 | Low (High Sensitivity) |
-| Support Vector Machine| 0.83 | Moderate |
+```bash
+python -m src.train
+```
 
-**Key Insight:** Gradient Boosting outperformed linear models by effectively capturing non-linear relationships between "Stress Level" and "Sleep Apnea" that PCA components highlighted.
+This command compares the three candidate models, then regenerates:
 
+- `models/sleep_disorder_pipeline.joblib`
+- `reports/model_comparison.png`
+
+Optional paths can be supplied with `--data`, `--model-output`, and
+`--report-output`.
+
+## Predict
+
+Run the interactive predictor:
+
+```bash
+python -m src.predict
+```
+
+For a repeatable non-interactive prediction, create `patient.json`:
+
+```json
+{
+  "Gender": "Male",
+  "Age": 31,
+  "Occupation": "Software Engineer",
+  "Sleep Duration": 7.2,
+  "Quality of Sleep": 8,
+  "Physical Activity Level": 60,
+  "Stress Level": 4,
+  "BMI Category": "Normal",
+  "Blood Pressure": "120/80",
+  "Heart Rate": 70,
+  "Daily Steps": 8000
+}
+```
+
+Then run:
+
+```bash
+python -m src.predict --input-json patient.json
+```
+
+Only load `.joblib` files from sources you trust. Joblib artifacts can execute
+code when loaded.
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+GitHub Actions runs the same test command with Python 3.11 for every push and
+pull request.
+
+## Docker
+
+Build the inference image:
+
+```bash
+docker build -t sleep-disorder-classifier .
+```
+
+Run it interactively:
+
+```bash
+docker run --rm -it sleep-disorder-classifier
+```
+
+Or provide a JSON file:
+
+```bash
+docker run --rm \
+  -v "$PWD/patient.json:/tmp/patient.json:ro" \
+  sleep-disorder-classifier \
+  --input-json /tmp/patient.json
+```
 
 ## Tech Stack
 
-* Python 3
-* pandas
-* numpy
-* scikit-learn
-* matplotlib
-* seaborn
-* scipy
-* joblib
+- Python
+- pandas and NumPy
+- scikit-learn
+- SciPy
+- Matplotlib and seaborn
+- joblib
 
+Exact tested dependency versions are pinned in `requirements.txt`.
 
+## Limitations
+
+- The dataset is small and synthetic, so reported scores may not generalize to
+  real clinical populations.
+- The model has not been clinically validated.
+- Predictions depend on self-reported and simplified health features.
+- Fold standard deviations describe variation among five correlated
+  validation folds; they are not population confidence intervals or
+  guarantees for future data.
+- Model selection and reporting use the same internal cross-validation, so
+  the comparison can be optimistic and should be confirmed on external data.
 
 ## License
 
-This project is licensed under the **CC-BY (Creative Commons Attribution)** license.
+The source code in this repository is licensed under the
+[MIT License](LICENSE).
 
-
+The dataset is a separate work distributed by its publisher under
+[CC0: Public Domain](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset).
+The MIT License does not apply to the dataset.
 
 ## Citation
 
-Do, Chi Khoa (2026). *Sleep Health and Lifestyle Dataset Analysis and Prediction*.  
-
-🔗 [Project Link](https://github.com/Dochikhoa2006/Sleeping-Disorder-Analysis)
-
-
-
-## Acknowledgements
-
-This README structure is inspired by data documentation guidelines from:
-
-- [Queen’s University README Template](https://guides.library.queensu.ca/ReadmeTemplate)  
-- [Cornell University Data Sharing README Guide](https://data.research.cornell.edu/data-management/sharing/readme/)  
-
-This project utilizes the **Sleep Health and Lifestyle Dataset**, available on Kaggle:
-
-- [Sleep Health and Lifestyle Dataset](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset)
-
+Do, Chi Khoa (2026). *Sleep Health and Lifestyle Dataset Analysis and
+Prediction*.
 
 ## Contact
 
-Chi Khoa Do - dochikhoa2006@gmail.com.   
-For questions or collaboration, feel free to reach out.
+Chi Khoa Do — dochikhoa2006@gmail.com
